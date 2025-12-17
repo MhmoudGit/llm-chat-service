@@ -1,0 +1,11 @@
+services:
+  chat-service:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PORT=8080
+      - MAX_TOKENS=1024
+      - MODEL=llama-3.3-70b-versatile
+    restart: unless-stopped

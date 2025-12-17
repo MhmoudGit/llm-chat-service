@@ -1,0 +1,7 @@
+.env
+*.exe
+*.bin
+*.log
+*.lock
+.vscode
+.idea
