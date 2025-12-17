@@ -32,7 +32,7 @@ func main() {
 	llmClient := llm.NewClient(cfg)
 	chatService := chat.NewService(history, llmClient)
 	apiHandler := api.NewHandler(chatService)
-	router := api.NewRouter(apiHandler)
+	router := api.NewRouter(apiHandler, cfg)
 
 	server := &http.Server{
 		Addr:    ":" + cfg.Port,

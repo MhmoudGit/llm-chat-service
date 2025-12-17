@@ -1,0 +1,20 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck
+
+linters-settings:
+  errcheck:
+    ignore:
+      - Close
+      - (*http.ResponseWriter).Write
+      - fmt.Fprintf
+      - (*encoding/json.Encoder).Encode
+
+issues:
+  exclude-rules:
+    - path: cmd/loadtest/
+      linters:
+        - errcheck

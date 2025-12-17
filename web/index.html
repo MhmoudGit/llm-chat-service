@@ -16,6 +16,8 @@
             --input-bg: #1e293b;
             --border-color: #334155;
             --hover-color: #475569;
+            --modal-bg: #1e293b;
+            --overlay-bg: rgba(0, 0, 0, 0.7);
         }
 
         body {
@@ -150,8 +152,58 @@
             border-radius: 4px;
         }
 
+
         ::-webkit-scrollbar-thumb:hover {
             background: #475569;
+        }
+
+        /* Modal Styles */
+        #api-key-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-bg);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        #api-key-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            /* Ensure padding doesn't affect width */
+        }
+
+        #api-key-input:focus {
+            outline: none;
+            border-color: var(--user-msg-bg);
         }
     </style>
 </head>
@@ -170,11 +222,43 @@
         </div>
     </div>
 
+    <!-- API Key Modal -->
+    <div id="api-key-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Enter API Key</h3>
+            <input type="password" id="api-key-input" placeholder="Paste your API Key here">
+            <button id="save-api-key-btn">Start Chatting</button>
+        </div>
+    </div>
+
     <script>
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
+        const apiKeyModal = document.getElementById('api-key-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
 
+        let apiKey = localStorage.getItem('chat_api_key');
+
+        function checkApiKey() {
+            if (!apiKey) {
+                apiKeyModal.style.display = 'flex';
+            } else {
+                apiKeyModal.style.display = 'none';
+                loadHistory();
+            }
+        }
+
+        saveApiKeyBtn.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                apiKey = key;
+                localStorage.setItem('chat_api_key', apiKey);
+                apiKeyModal.style.display = 'none';
+                loadHistory();
+            }
+        });
 
         function appendMessage(role, content) {
             const div = document.createElement('div');
@@ -182,11 +266,7 @@
             div.innerHTML = formatContent(content);
             chatContainer.appendChild(div);
             scrollToBottom();
-
-
         }
-
-
 
         function formatContent(text) {
             return text.replace(/\n/g, '<br>');
@@ -197,20 +277,27 @@
         }
 
         async function loadHistory() {
+            if (!apiKey) return;
             try {
-                const response = await fetch('/history');
+                const response = await fetch('/history', {
+                    headers: {
+                        'Authorization': 'Bearer ' + apiKey
+                    }
+                });
+                if (response.status === 401) {
+                    localStorage.removeItem('chat_api_key');
+                    apiKey = null;
+                    checkApiKey();
+                    return;
+                }
                 const messages = await response.json();
                 chatContainer.innerHTML = '';
 
-
                 messages.forEach(msg => {
-                    // We append to chat container
                     const div = document.createElement('div');
                     div.className = 'message role-' + msg.role;
                     div.innerHTML = formatContent(msg.content);
                     chatContainer.appendChild(div);
-
-
                 });
 
                 scrollToBottom();
@@ -220,6 +307,10 @@
         }
 
         async function sendMessage() {
+            if (!apiKey) {
+                checkApiKey();
+                return;
+            }
             const content = messageInput.value.trim();
             if (!content) return;
 
@@ -232,11 +323,18 @@
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
                     body: JSON.stringify({
                         messages: [{ role: 'user', content: content }]
                     })
                 });
+
+                if (response.status === 401) {
+                    throw new Error('Unauthorized');
+                }
 
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -280,7 +378,13 @@
 
             } catch (error) {
                 console.error('Error sending message:', error);
-                appendMessage('assistant', 'Error: ' + error.message);
+                if (error.message === 'Unauthorized') {
+                    localStorage.removeItem('chat_api_key');
+                    apiKey = null;
+                    checkApiKey();
+                } else {
+                    appendMessage('assistant', 'Error: ' + error.message);
+                }
             } finally {
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
@@ -294,7 +398,7 @@
         });
 
         // Initial load
-        loadHistory();
+        checkApiKey();
     </script>
 </body>
 
