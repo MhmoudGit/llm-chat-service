@@ -13,7 +13,7 @@ A lightweight, concurrent Go web service powering a single-conversation chat int
 A simple, vanilla HTML/CSS/JS web interface is available to interact with the chat service.
 
 - **URL**: `http://localhost:8080/web`
-- **Features**: Real-time chat with streaming responses, view chat history.
+- **Features**: Real-time chat with streaming responses.
 
 ## Setup & Run
 
