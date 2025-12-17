@@ -27,6 +27,9 @@ A simple, vanilla HTML/CSS/JS web interface is available to interact with the ch
     ```bash
     export GROQ_API_KEY="your_api_key"
     export PORT=8080
+    export API_KEY="your_secret_key"
+    export RATE_LIMIT_RPS=10
+    export RATE_LIMIT_BURST=20
     ```
 2.  **Run**:
     ```bash
@@ -35,9 +38,21 @@ A simple, vanilla HTML/CSS/JS web interface is available to interact with the ch
 
 ### Running with Docker
 ```bash
-GROQ_API_KEY=your_key docker-compose up --build
+GROQ_API_KEY=your_key API_KEY=secret docker-compose up --build
 ```
 The service will be available at `http://localhost:8080`.
+
+## Security
+
+### API Key Authentication
+The service is protected by API Key authentication.
+- **Header**: `Authorization: Bearer <your_api_key>` or `X-API-Key: <your_api_key>`
+- **Configuration**: Set `API_KEY` environment variable.
+
+### Rate Limiting
+Requests are rate-limited per IP address.
+- **Default**: 10 requests per second with a burst of 20.
+- **Configuration**: Set `RATE_LIMIT_RPS` and `RATE_LIMIT_BURST`.
 
 ## API Contract
 
@@ -48,7 +63,10 @@ The service will be available at `http://localhost:8080`.
 
 ### 2. Chat Completion
 - **Endpoint**: `POST /chat`
-- **Headers**: `Content-Type: application/json`
+
+- **Headers**: 
+    - `Content-Type: application/json`
+    - `Authorization: Bearer <your_api_key>`
 - **Body**:
     ```json
     {
@@ -67,6 +85,7 @@ The service will be available at `http://localhost:8080`.
 ```bash
 curl -N -X POST http://localhost:8080/chat \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_secret_key" \
   -d '{
     "messages": [{"role": "user", "content": "Explain quantum computing briefly"}],
     "stream": true
@@ -76,6 +95,7 @@ curl -N -X POST http://localhost:8080/chat \
 
 ### 3. Chat History
 - **Endpoint**: `GET /history`
+- **Headers**: `Authorization: Bearer <your_api_key>`
 - **Response**: JSON array of message objects.
 
 ## Continuous Integration
