@@ -91,7 +91,6 @@ curl -N -X POST http://localhost:8080/chat \
     "stream": true
   }'
 ```
-```
 
 ### 3. Chat History
 - **Endpoint**: `GET /history`
