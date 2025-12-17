@@ -1,8 +1,19 @@
 # Go LLM Chat Service
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/MhmoudGit/llm-chat-service)](https://goreportcard.com/report/github.com/MhmoudGit/llm-chat-service)
+![Go Version](https://img.shields.io/github/go-mod/go-version/MhmoudGit/llm-chat-service)
+[![CI](https://github.com/MhmoudGit/llm-chat-service/actions/workflows/ci.yml/badge.svg)](https://github.com/MhmoudGit/llm-chat-service/actions/workflows/ci.yml)
+
 A lightweight, concurrent Go web service powering a single-conversation chat interface with Groq Cloud LLMs. Supported by Server-Sent Events (SSE) for real-time token streaming.
 
 [This Repo Contains code generated using Antigravity AI with Gemini 3 Pro Model]
+
+## Web Interface
+
+A simple, vanilla HTML/CSS/JS web interface is available to interact with the chat service.
+
+- **URL**: `http://localhost:8080/web`
+- **Features**: Real-time chat with streaming responses, view chat history.
 
 ## Setup & Run
 
@@ -61,7 +72,21 @@ curl -N -X POST http://localhost:8080/chat \
     "stream": true
   }'
 ```
+```
 
+### 3. Chat History
+- **Endpoint**: `GET /history`
+- **Response**: JSON array of message objects.
+
+## Continuous Integration
+
+This project uses GitHub Actions for CI.
+
+- **Workflow**: `.github/workflows/ci.yml`
+- **Triggers**: Push and Pull Request to `main` branch.
+- **Jobs**:
+    - **Test**: Runs `go test -v ./...`
+    - **Lint**: Runs `golangci-lint` to ensure code quality.
 ## Design Notes
 
 **Architecture**
