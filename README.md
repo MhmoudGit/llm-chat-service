@@ -31,14 +31,17 @@ A simple, vanilla HTML/CSS/JS web interface is available to interact with the ch
     export RATE_LIMIT_RPS=10
     export RATE_LIMIT_BURST=20
     ```
+    Or Just use the '.env.example' file in the root directory.
+
 2.  **Run**:
     ```bash
     go run cmd/server/main.go
     ```
 
 ### Running with Docker
+- Run after setting the environment variables in the '.env' file:
 ```bash
-GROQ_API_KEY=your_key API_KEY=secret docker-compose up --build
+docker-compose up --build
 ```
 The service will be available at `http://localhost:8080`.
 
