@@ -75,3 +75,27 @@ func (h *Handler) HandleChat(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "data: [DONE]\n\n")
 	flusher.Flush()
 }
+
+// just for tracking history
+func (h *Handler) HandleHistory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	history := h.chatService.GetHistory()
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(history); err != nil {
+		http.Error(w, "Failed to encode history", http.StatusInternalServerError)
+	}
+}
+
+func (h *Handler) HandleWeb(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	http.ServeFile(w, r, "web/index.html")
+}

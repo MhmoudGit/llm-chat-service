@@ -57,3 +57,7 @@ func (s *Service) ProcessMessage(userContent string) (<-chan string, error) {
 
 	return outChan, nil
 }
+
+func (s *Service) GetHistory() []Message {
+	return s.history.GetAll()
+}

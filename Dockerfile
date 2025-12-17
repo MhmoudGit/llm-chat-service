@@ -18,6 +18,7 @@ WORKDIR /root/
 
 COPY --from=builder /app/chat-service .
 COPY .env .
+COPY --from=builder /app/web ./web
 
 # Expose port
 EXPOSE 8080
